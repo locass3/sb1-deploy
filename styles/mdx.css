@@ -1,0 +1,36 @@
+/* Add any custom MDX styles here */
+.mdx-content h1 {
+  @apply text-3xl font-bold mb-4;
+}
+
+.mdx-content h2 {
+  @apply text-2xl font-semibold mb-3;
+}
+
+.mdx-content p {
+  @apply mb-4;
+}
+
+.mdx-content ul, .mdx-content ol {
+  @apply mb-4 ml-6;
+}
+
+.mdx-content li {
+  @apply mb-2;
+}
+
+.mdx-content pre {
+  @apply bg-gray-100 p-4 rounded-md overflow-x-auto mb-4;
+}
+
+.mdx-content code {
+  @apply bg-gray-100 px-1 py-0.5 rounded;
+}
+
+.mdx-content blockquote {
+  @apply border-l-4 border-gray-300 pl-4 italic my-4;
+}
+
+.mdx-content img {
+  @apply rounded-lg my-4;
+}

@@ -1,0 +1,122 @@
+---
+title: "Dynamic Routing and Static Regeneration"
+date: "2023-03-15"
+excerpt: "Learn how to implement dynamic routing and static regeneration in Next.js"
+image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
+---
+
+# Dynamic Routing and Static Regeneration in Next.js
+
+Next.js is a powerful React framework that provides features like server-side rendering and static site generation out of the box. Two of its most useful features are dynamic routing and static regeneration. Let's explore how these work and how you can implement them in your Next.js applications.
+
+## Dynamic Routing
+
+Dynamic routing allows you to create pages with paths that depend on external data. This is particularly useful for blogs, e-commerce sites, or any application where you have a large number of similar pages that follow a consistent layout but with different content.
+
+Here's how you can implement dynamic routing:
+
+1. Create a file with square brackets in its name, like `[id].js` or `[slug].js`, inside your `pages` directory.
+2. In this file, export a React component as usual.
+3. To access the dynamic part of the route, use the `useRouter` hook from `next/router`.
+
+Here's a simple example:
+
+```jsx
+import { useRouter } from 'next/router'
+
+export default function Post() {
+  const router = useRouter()
+  const { id } = router.query
+
+  return <p>Post: {id}</p>
+}
+```
+
+This will create pages for any route like `/post/1`, `/post/2`, etc., where `1` and `2` will be available as `id` in your component.
+
+## Static Regeneration
+
+Static Regeneration, or Incremental Static Regeneration (ISR), allows you to update static pages after you've built your site. This is incredibly useful for content that changes, but not frequently enough to warrant server-side rendering on every request.
+
+To use Static Regeneration:
+
+1. Use `getStaticProps` to fetch data at build time.
+2. Add a `revalidate` property to the object returned by `getStaticProps`.
+
+Here's an example:
+
+```jsx
+export async function getStaticProps() {
+  const res = await fetch('https://api.example.com/posts')
+  const posts = await res.json()
+
+  return {
+    props: {
+      posts,
+    },
+    revalidate: 60, // In seconds
+  }
+}
+
+export default function Blog({ posts }) {
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+In this example, the page will be regenerated at most once every 60 seconds if a request comes in. This means your data can stay relatively fresh without having to rebuild your entire site.
+
+## Combining Dynamic Routing and Static Regeneration
+
+You can combine these two features to create powerful, dynamic websites that are also fast and SEO-friendly. Here's an example of how you might create a blog post page that uses both dynamic routing and static regeneration:
+
+```jsx
+import { useRouter } from 'next/router'
+
+export async function getStaticPaths() {
+  const res = await fetch('https://api.example.com/posts')
+  const posts = await res.json()
+
+  const paths = posts.map((post) => ({
+    params: { id: post.id.toString() },
+  }))
+
+  return { paths, fallback: 'blocking' }
+}
+
+export async function getStaticProps({ params }) {
+  const res = await fetch(`https://api.example.com/posts/${params.id}`)
+  const post = await res.json()
+
+  return {
+    props: { post },
+    revalidate: 60,
+  }
+}
+
+export default function Post({ post }) {
+  const router = useRouter()
+
+  if (router.isFallback) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <div>
+      <h1>{post.title}</h1>
+      <p>{post.content}</p>
+    </div>
+  )
+}
+```
+
+This setup will create static pages for all your posts at build time, allow new posts to be added without rebuilding (thanks to `fallback: 'blocking'`), and update each post page if its content changes (checking every 60 seconds).
+
+By leveraging these features, you can create websites that are dynamic and always up-to-date, while still enjoying the benefits of static generation like improved performance and SEO.
+
+Remember, the key to mastering Next.js is understanding these core concepts and knowing when to apply them in your projects. Happy coding!
